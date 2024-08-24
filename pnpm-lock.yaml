@@ -185,6 +185,9 @@ importers:
 
   apps/web-ele:
     dependencies:
+      '@element-plus/icons-vue':
+        specifier: ^2.3.1
+        version: 2.3.1(vue@3.4.38(typescript@5.5.4))
       '@vben/access':
         specifier: workspace:*
         version: link:../../packages/effects/access
@@ -1014,6 +1017,9 @@ importers:
 
   packages/icons:
     dependencies:
+      '@element-plus/icons-vue':
+        specifier: ^2.3.1
+        version: 2.3.1(vue@3.4.38(typescript@5.5.4))
       '@vben-core/icons':
         specifier: workspace:*
         version: link:../@core/base/icons

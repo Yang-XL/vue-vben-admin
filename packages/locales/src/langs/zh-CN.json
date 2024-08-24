@@ -12,6 +12,17 @@
       "analytics": "分析页",
       "workspace": "工作台"
     },
+    "sysUser": {
+      "title": "系统用户",
+      "company": "公司管理",
+      "user": "用户管理",
+      "role": "角色管理"
+    },
+    "sysManager": {
+      "title": "系统管理",
+      "menu": "菜单管理",
+      "role": "全局配置"
+    },
     "vben": {
       "title": "项目",
       "about": "关于",
@@ -87,12 +98,12 @@
     }
   },
   "authentication": {
-    "welcomeBack": "欢迎回来",
-    "pageTitle": "开箱即用的大型中后台管理系统",
-    "pageDesc": "工程化、高性能、跨组件库的前端模版",
+    "welcomeBack": "欢迎使用",
+    "pageTitle": "Yxl后台管理系统",
+    "pageDesc": "",
     "loginSuccess": "登录成功",
     "loginSuccessDesc": "欢迎回来",
-    "loginSubtitle": "请输入您的帐户信息以开始管理您的项目",
+    "loginSubtitle": "请输入您的账号和密码",
     "username": "账号",
     "password": "密码",
     "usernameTip": "请输入用户名",

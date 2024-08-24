@@ -11,8 +11,8 @@ const authStore = useAuthStore();
 <template>
   <AuthenticationLogin
     :loading="authStore.loginLoading"
-    password-placeholder="123456"
-    username-placeholder="vben"
+    password-placeholder="请输入密码"
+    username-placeholder="请输入用户名"
     @submit="authStore.authLogin"
   />
 </template>
