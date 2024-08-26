@@ -18,6 +18,8 @@ import {
   ElCard,
   ElCol,
   ElContainer,
+  ElDescriptions,
+  ElDescriptionsItem,
   ElDialog,
   ElDivider,
   ElFooter,
@@ -26,8 +28,10 @@ import {
   ElHeader,
   ElInput,
   ElMain,
+  ElMessage,
   ElOption,
   ElPagination,
+  ElPopconfirm,
   ElRow,
   ElSelect,
   ElTable,
@@ -102,7 +106,7 @@ const menuTableLoad = (
         CreateTime: '2016-05-01 12:25:00',
         HasChildren: false,
         Id: 'F3FBFE37-F445-431F-8649-50732AB7A311',
-        Name: '菜单管理',
+        Name: '模块管理',
         PId: 'F3FBFE37-F445-431F-8649-50732AB7A3F1',
         Remark: 'No. 189, Grove St, Los Angeles',
       },
@@ -111,7 +115,7 @@ const menuTableLoad = (
         CreateTime: '2016-05-01 12:25:00',
         HasChildren: false,
         Id: 'F3FBFE37-F445-431F-8649-50732AB7A312',
-        Name: '系统设置',
+        Name: '全局设置',
         PId: 'F3FBFE37-F445-431F-8649-50732AB7A3F1',
         Remark: 'No. 189, Grove St, Los Angeles',
       },
@@ -135,18 +139,20 @@ const handleCurrentChange = (val: number) => {
 
 // #region 弹窗区域
 const background = ref(false);
+const menuDetailDialog = ref(false);
 const disabled = ref(false);
 const dialogAddOrEditVisible = ref(false);
-const onDeleteMenu = () => {
-  window.console.log('Delete');
-};
 
 function showAddOrEditDialog() {
   dialogAddOrEditVisible.value = true;
 }
 
 function SaveMenu() {
+  ElMessage.success('添加成功');
   dialogAddOrEditVisible.value = false;
+}
+function onRemove() {
+  ElMessage.success('删除成功');
 }
 // #endregion
 
@@ -286,18 +292,38 @@ const rules = reactive<FormRules<RuleForm>>({
               <template #default>
                 <ElButton
                   size="small"
-                  title="删除"
-                  type="danger"
-                  @click="onDeleteMenu"
+                  title="详情"
+                  type="primary"
+                  @click="menuDetailDialog = true"
                 >
-                  <LucidX />
-                </ElButton>
-                <ElButton size="small" title="详情" type="primary">
                   <LucidEye />
                 </ElButton>
-                <ElButton size="small" title="编辑" type="primary">
+                <ElButton
+                  size="small"
+                  title="编辑"
+                  type="primary"
+                  @click="dialogAddOrEditVisible = true"
+                >
                   <LucidPen />
                 </ElButton>
+                <ElPopconfirm
+                  icon-color="#626AEF"
+                  title="确认删除本条数据？"
+                  width="220"
+                  @confirm="onRemove"
+                >
+                  <template #reference>
+                    <ElButton size="small" title="删除" type="danger">
+                      <LucidX />
+                    </ElButton>
+                  </template>
+                  <template #actions="{ confirm, cancel }">
+                    <ElButton size="small" @click="cancel">取消</ElButton>
+                    <ElButton size="small" type="danger" @click="confirm">
+                      删除
+                    </ElButton>
+                  </template>
+                </ElPopconfirm>
               </template>
             </ElTableColumn>
           </ElTable>
@@ -378,6 +404,55 @@ const rules = reactive<FormRules<RuleForm>>({
     <template #footer>
       <ElButton @click="dialogAddOrEditVisible = false"> 取消 </ElButton>
       <ElButton type="primary" @click="SaveMenu"> 保存 </ElButton>
+    </template>
+  </ElDialog>
+
+  <ElDialog v-model="menuDetailDialog" draggable overflow width="700">
+    <template #header>详情</template>
+    <ElDivider />
+
+    <ElDescriptions
+      :column="3"
+      :size="size"
+      border
+      class="margin-top"
+      title="With border"
+    >
+      <template #extra>
+        <ElButton type="primary">Operation</ElButton>
+      </template>
+      <ElDescriptionsItem>
+        <template #label> Username </template>
+        kooriookami
+      </ElDescriptionsItem>
+      <ElDescriptionsItem>
+        <template #label>
+          <div class="cell-item">Telephone</div>
+        </template>
+        18100000000
+      </ElDescriptionsItem>
+      <ElDescriptionsItem>
+        <template #label>
+          <div class="cell-item">Place</div>
+        </template>
+        Suzhou
+      </ElDescriptionsItem>
+      <ElDescriptionsItem>
+        <template #label>
+          <div class="cell-item">Remarks</div>
+        </template>
+        <el-tag size="small">School</el-tag>
+      </ElDescriptionsItem>
+      <ElDescriptionsItem>
+        <template #label>
+          <div class="cell-item">Address</div>
+        </template>
+        No.1188, Wuzhong Avenue, Wuzhong District, Suzhou, Jiangsu Province
+      </ElDescriptionsItem>
+    </ElDescriptions>
+    <ElDivider />
+    <template #footer>
+      <ElButton @click="menuDetailDialog = false"> 关闭 </ElButton>
     </template>
   </ElDialog>
 </template>
