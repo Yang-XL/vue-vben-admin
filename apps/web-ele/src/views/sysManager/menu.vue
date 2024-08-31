@@ -423,7 +423,7 @@ const rules = reactive<FormRules<RuleForm>>({
       </template>
       <ElDescriptionsItem>
         <template #label> Username </template>
-        kooriookami
+        Yxl
       </ElDescriptionsItem>
       <ElDescriptionsItem>
         <template #label>
@@ -447,7 +447,7 @@ const rules = reactive<FormRules<RuleForm>>({
         <template #label>
           <div class="cell-item">Address</div>
         </template>
-        No.1188, Wuzhong Avenue, Wuzhong District, Suzhou, Jiangsu Province
+        备注
       </ElDescriptionsItem>
     </ElDescriptions>
     <ElDivider />

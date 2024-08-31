@@ -2,9 +2,9 @@ export const MOCK_USERS = [
   {
     id: 0,
     password: '123456',
-    realName: 'Vben',
-    roles: ['super'],
-    username: 'vben',
+    realName: '超级管理员',
+    roles: ['administrator'],
+    username: 'administrator',
   },
   {
     id: 1,
@@ -16,9 +16,9 @@ export const MOCK_USERS = [
   {
     id: 2,
     password: '123456',
-    realName: 'Jack',
+    realName: 'Yxl',
     roles: ['user'],
-    username: 'jack',
+    username: 'yxl',
   },
 ];
 
@@ -26,7 +26,7 @@ export const MOCK_CODES = [
   // super
   {
     codes: ['AC_100100', 'AC_100110', 'AC_100120', 'AC_100010'],
-    username: 'vben',
+    username: 'administrator',
   },
   {
     // admin
@@ -36,7 +36,7 @@ export const MOCK_CODES = [
   {
     // user
     codes: ['AC_1000001', 'AC_1000002'],
-    username: 'jack',
+    username: 'yxl',
   },
 ];
 
@@ -72,7 +72,7 @@ const dashboardMenus = [
   },
 ];
 
-const createDemosMenus = (role: 'admin' | 'super' | 'user') => {
+const createDemosMenus = (role: 'admin' | 'administrator' | 'user') => {
   const roleWithMenus = {
     admin: {
       component: '/demos/access/admin-visible',
@@ -83,7 +83,7 @@ const createDemosMenus = (role: 'admin' | 'super' | 'user') => {
       name: 'AccessAdminVisibleDemo',
       path: '/demos/access/admin-visible',
     },
-    super: {
+    administrator: {
       component: '/demos/access/super-visible',
       meta: {
         icon: 'mdi:button-cursor',
@@ -164,8 +164,8 @@ const createDemosMenus = (role: 'admin' | 'super' | 'user') => {
 
 export const MOCK_MENUS = [
   {
-    menus: [...dashboardMenus, ...createDemosMenus('super')],
-    username: 'vben',
+    menus: [...dashboardMenus, ...createDemosMenus('administrator')],
+    username: 'administrator',
   },
   {
     menus: [...dashboardMenus, ...createDemosMenus('admin')],
@@ -173,6 +173,6 @@ export const MOCK_MENUS = [
   },
   {
     menus: [...dashboardMenus, ...createDemosMenus('user')],
-    username: 'jack',
+    username: 'Yxl',
   },
 ];
