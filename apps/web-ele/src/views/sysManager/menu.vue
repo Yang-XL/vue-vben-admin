@@ -3,6 +3,8 @@
 
 import type { ComponentSize, FormInstance, FormRules } from 'element-plus';
 
+import type { SysMenu } from '#/types';
+
 import { reactive, ref } from 'vue';
 
 import {
@@ -36,7 +38,10 @@ import {
   ElSelect,
   ElTable,
   ElTableColumn,
+  ElTag,
 } from 'element-plus';
+
+import { getChildPageList, getParentPageList } from '#/api';
 
 // #endregion
 
@@ -47,81 +52,24 @@ interface MenuQuery {
 const queryData: MenuQuery = { NameOrCode: '' };
 
 const onQueryMenu = () => {
-  window.console.log('submit!');
+  LoadData();
 };
 // #endregion
 
 // #region 表格区域
-interface Menu {
-  Id: string;
-  CreateTime: string;
-  Code: string;
-  Remark: string;
-  PId: string;
-  Name: string;
-  HasChildren: boolean;
-  children?: Menu[];
+
+const tableData = ref<SysMenu[]>();
+
+function LoadData() {
+  getParentPageList().then((p: SysMenu[]) => {
+    tableData.value = p;
+  });
 }
-
-const tableData1: Menu[] = [
-  {
-    Code: 'sys_001',
-    CreateTime: '2016-05-01 12:25:00',
-    HasChildren: true,
-    Id: 'F3FBFE37-F445-431F-8649-50732AB7A3F1',
-    Name: '系统管理',
-    PId: '00000000-0000-0000-0000-000000000000',
-    Remark: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    Code: 'sys_002',
-    CreateTime: '2016-05-01 12:25:00',
-    HasChildren: false,
-    Id: 'F3FBFE37-F445-431F-8649-50732AB7A3F2',
-    Name: '用户管理',
-    PId: '00000000-0000-0000-0000-000000000000',
-    Remark: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    Code: 'sys_003',
-    CreateTime: '2016-05-01 12:25:00',
-    HasChildren: false,
-    Id: 'F3FBFE37-F445-431F-8649-50732AB7A3F3',
-    Name: '角色权限',
-    PId: '00000000-0000-0000-0000-000000000000',
-    Remark: 'No. 189, Grove St, Los Angeles',
-  },
-];
-
-const menuTableLoad = (
-  row: Menu,
+const table_Parent_Row_Click = (
+  row: SysMenu,
   _treeNode: unknown,
-  resolve: (date: Menu[]) => void,
-) => {
-  window.console.log(`当前点击行：${row.Code}`);
-  setTimeout(() => {
-    resolve([
-      {
-        Code: 'sys_001_001',
-        CreateTime: '2016-05-01 12:25:00',
-        HasChildren: false,
-        Id: 'F3FBFE37-F445-431F-8649-50732AB7A311',
-        Name: '模块管理',
-        PId: 'F3FBFE37-F445-431F-8649-50732AB7A3F1',
-        Remark: 'No. 189, Grove St, Los Angeles',
-      },
-      {
-        Code: 'sys_001_002',
-        CreateTime: '2016-05-01 12:25:00',
-        HasChildren: false,
-        Id: 'F3FBFE37-F445-431F-8649-50732AB7A312',
-        Name: '全局设置',
-        PId: 'F3FBFE37-F445-431F-8649-50732AB7A3F1',
-        Remark: 'No. 189, Grove St, Los Angeles',
-      },
-    ]);
-  }, 1000);
-};
+  resolve: (date: SysMenu[]) => void,
+) => getChildPageList(row.Id).then((c: SysMenu[]) => resolve(c));
 
 // #endregion
 
@@ -170,6 +118,7 @@ interface RuleForm {
 }
 
 const formSize = ref<ComponentSize>('default');
+
 const ruleFormRef = ref<FormInstance>();
 const ruleForm = reactive<RuleForm>({
   count: '',
@@ -276,8 +225,8 @@ const rules = reactive<FormRules<RuleForm>>({
             </ElButton>
           </template>
           <ElTable
-            :data="tableData1"
-            :load="menuTableLoad"
+            :data="tableData"
+            :load="table_Parent_Row_Click"
             :tree-props="{ children: 'children', hasChildren: 'HasChildren' }"
             border
             lazy
@@ -441,7 +390,7 @@ const rules = reactive<FormRules<RuleForm>>({
         <template #label>
           <div class="cell-item">Remarks</div>
         </template>
-        <el-tag size="small">School</el-tag>
+        <ElTag size="small">School</ElTag>
       </ElDescriptionsItem>
       <ElDescriptionsItem>
         <template #label>
