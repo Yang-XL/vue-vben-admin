@@ -23,6 +23,15 @@ const routes: RouteRecordRaw[] = [
           title: $t('page.sysManager.menu'),
         },
       },
+      {
+        name: $t('page.sysManager.config'),
+        path: '/sysManager',
+        component: () => import('#/views/sysManager/menu.vue'),
+        meta: {
+          icon: 'lucide:menu',
+          title: $t('page.sysManager.config'),
+        },
+      },
     ],
   },
 ];

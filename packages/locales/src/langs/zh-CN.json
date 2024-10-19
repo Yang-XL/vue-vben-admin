@@ -1,4 +1,14 @@
 {
+  "btn": {
+    "openAdd": "添加",
+    "save": "保存",
+    "edit": "编辑",
+    "remove": "删除",
+    "remove_confirm": "确认删除"
+  },
+  "title": {
+    "addTitle": "添加"
+  },
   "page": {
     "core": {
       "login": "登陆",
@@ -12,16 +22,18 @@
       "analytics": "分析页",
       "workspace": "工作台"
     },
-    "sysUser": {
-      "title": "系统用户",
+    "sysUserPermissions": {
+      "title": "用户权限",
       "company": "公司管理",
       "user": "用户管理",
-      "role": "角色管理"
+      "role": "角色管理",
+      "permissions": "权限管理"
     },
+
     "sysManager": {
       "title": "系统管理",
       "menu": "菜单管理",
-      "role": "全局配置"
+      "config": "全局配置"
     },
     "vben": {
       "title": "项目",

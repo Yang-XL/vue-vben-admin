@@ -1,3 +1,5 @@
+import { fileURLToPath, URL } from 'node:url';
+
 import { defineConfig } from '@vben/vite-config';
 
 import ElementPlus from 'unplugin-element-plus/vite';
@@ -5,6 +7,11 @@ import ElementPlus from 'unplugin-element-plus/vite';
 export default defineConfig(async () => {
   return {
     application: {},
+    resolve: {
+      alias: {
+        '#': fileURLToPath(new URL('src', import.meta.url)),
+      },
+    },
     vite: {
       plugins: [
         ElementPlus({

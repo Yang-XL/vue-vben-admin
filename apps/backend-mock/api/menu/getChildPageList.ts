@@ -7,6 +7,9 @@ export default eventHandler((event) => {
   }
 
   const query = getQuery(event);
-  const children = MOCK_ChildMenu_List.filter((a) => a.PId === query.pid);
+
+  const children = MOCK_ChildMenu_List.filter(
+    (a) => a.PId === query.pid.toString(),
+  );
   return useResponseSuccess(children);
 });

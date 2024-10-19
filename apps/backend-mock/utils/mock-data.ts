@@ -25,12 +25,12 @@ export const MOCK_USERS = [
 export const MOCK_CODES = [
   // super
   {
-    codes: ['AC_100100', 'AC_100110', 'AC_100120', 'AC_100010'],
+    codes: ['sys_001', 'sys_001_001', 'AC_100120', 'AC_100010'],
     username: 'administrator',
   },
   {
     // admin
-    codes: ['AC_100010', 'AC_100020', 'AC_100030'],
+    codes: ['sys_001', 'AC_100030'],
     username: 'admin',
   },
   {

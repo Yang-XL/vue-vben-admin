@@ -37,13 +37,12 @@ import {
   ElTag,
 } from 'element-plus';
 
-import { getChildPageList, getParentPageList } from '#/api';
 import {
   type PageInfo,
-  type SysMenu,
-  sysMenuRules,
+  type SysUser,
+  sysUserRules,
   useDefaultPage,
-  useDefaultSysMenu,
+  useDefaultSysUser,
 } from '#/types';
 
 // #endregion
@@ -61,25 +60,19 @@ const onQueryMenu = () => {
 
 // #region 表格区域
 
-const tableData = reactive<SysMenu[]>([]);
-const parent = reactive<SysMenu[]>([]);
+const tableData = reactive<SysUser[]>([]);
+
 onMounted(() => {
-  getParentPageList().then((p: SysMenu[]) => {
-    Object.assign(tableData, p);
-    Object.assign(parent, p);
-  });
+  // getParentPageList().then((p: SysUser[]) => {
+  //   Object.assign(tableData, p);
+  // });
 });
 
 function LoadData() {
-  getParentPageList().then((p: SysMenu[]) => {
-    Object.assign(tableData, p);
-  });
+  // getParentPageList().then((p: SysUser[]) => {
+  //   Object.assign(tableData, p);
+  // });
 }
-const table_Parent_Row_Click = (
-  row: SysMenu,
-  _treeNode: unknown,
-  resolve: (date: SysMenu[]) => void,
-) => getChildPageList(row.Id).then((c: SysMenu[]) => resolve(c));
 
 // #endregion
 
@@ -99,11 +92,11 @@ const handleCurrentChange = (val: number) => {
 const menuDetailDialog = ref(false);
 const dialogAddOrEditVisible = ref(false);
 
-const ruleForm = reactive<SysMenu>(useDefaultSysMenu());
+const ruleForm = reactive<SysUser>(useDefaultSysUser());
 
 const dialogAddOrEdidTitle = ref('添加');
 const ruleFormRef = ref<FormInstance>();
-const rules = reactive<FormRules<SysMenu>>(sysMenuRules);
+const rules = reactive<FormRules<SysUser>>(sysUserRules);
 function onEdit() {
   dialogAddOrEdidTitle.value = '编辑';
   dialogAddOrEditVisible.value = true;
@@ -162,8 +155,6 @@ function onRemove() {
           <ElTable
             :border="true"
             :data="tableData"
-            :load="table_Parent_Row_Click"
-            :tree-props="{ hasChildren: 'HasChildren' }"
             lazy
             row-key="Id"
             style="width: 100%"
@@ -270,7 +261,7 @@ function onRemove() {
               <ElFormItem label="路由地址" prop="RoutPath" />
             </div>
           </template>
-          <ElInput v-model="ruleForm.RoutPath" />
+          <ElInput v-model="ruleForm.Path" />
         </ElDescriptionsItem>
         <ElDescriptionsItem>
           <template #label>

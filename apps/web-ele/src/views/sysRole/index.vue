@@ -13,6 +13,7 @@ import {
   LucidX,
 } from '@vben/icons';
 
+import { getRolePageList } from '@/api';
 import {
   ElButton,
   ElCard,
@@ -28,98 +29,89 @@ import {
   ElInput,
   ElMain,
   ElMessage,
-  ElOption,
   ElPagination,
   ElPopconfirm,
-  ElSelect,
   ElTable,
   ElTableColumn,
   ElTag,
 } from 'element-plus';
 
-import { getChildPageList, getParentPageList } from '#/api';
 import {
   type PageInfo,
-  type SysMenu,
-  sysMenuRules,
+  type SysRole,
+  type SysRoleQuery,
+  sysRoleRules,
   useDefaultPage,
-  useDefaultSysMenu,
+  useDefaultSysRole,
 } from '#/types';
 
-// #endregion
-
-// #region 查询区域
-interface MenuQuery {
-  NameOrCode: string;
-}
-const queryData: MenuQuery = reactive({ NameOrCode: '' });
+const page = reactive<PageInfo>(useDefaultPage());
+const queryData: SysRoleQuery = reactive({ NameOrCode: '' });
 
 const onQueryMenu = () => {
+  page.CurrentPage = 0;
   LoadData();
 };
 // #endregion
 
 // #region 表格区域
 
-const tableData = reactive<SysMenu[]>([]);
-const parent = reactive<SysMenu[]>([]);
+const tableData = reactive<SysRole[]>([]);
+
 onMounted(() => {
-  getParentPageList().then((p: SysMenu[]) => {
-    Object.assign(tableData, p);
-    Object.assign(parent, p);
-  });
+  LoadData();
 });
 
 function LoadData() {
-  getParentPageList().then((p: SysMenu[]) => {
+  window.console.log(`${page.CurrentPage} items per page`);
+  getRolePageList().then((p: SysRole[]) => {
     Object.assign(tableData, p);
   });
 }
-const table_Parent_Row_Click = (
-  row: SysMenu,
-  _treeNode: unknown,
-  resolve: (date: SysMenu[]) => void,
-) => getChildPageList(row.Id).then((c: SysMenu[]) => resolve(c));
 
 // #endregion
 
 // #region 分页区域
 
-const page = reactive<PageInfo>(useDefaultPage());
-
 const handleSizeChange = (val: number) => {
-  window.console.log(`${val} items per page`);
+  page.CurrentPage = val;
 };
 const handleCurrentChange = (val: number) => {
-  window.console.log(`current page: ${val}`);
+  page.CurrentPage = val;
 };
 // #endregion
 
 // #region 弹窗区域
-const menuDetailDialog = ref(false);
-const dialogAddOrEditVisible = ref(false);
 
-const ruleForm = reactive<SysMenu>(useDefaultSysMenu());
+const detailDialogDisplay = ref(false);
+const editDialogDisplay = ref(false);
+const editDialogTitle = ref('');
 
-const dialogAddOrEdidTitle = ref('添加');
+const ruleForm = reactive<SysRole>(useDefaultSysRole());
+
 const ruleFormRef = ref<FormInstance>();
-const rules = reactive<FormRules<SysMenu>>(sysMenuRules);
+const rules = reactive<FormRules<SysRole>>(sysRoleRules);
+
 function onEdit() {
-  dialogAddOrEdidTitle.value = '编辑';
-  dialogAddOrEditVisible.value = true;
+  editDialogTitle.value = '编辑';
+  editDialogDisplay.value = true;
 }
 
 function onAddClick() {
-  dialogAddOrEdidTitle.value = '添加';
-  dialogAddOrEditVisible.value = true;
+  editDialogTitle.value = '添加';
+  editDialogDisplay.value = true;
 }
 
-const SaveMenu = async (formEl: FormInstance | undefined) => {
+function onViewDetail() {
+  detailDialogDisplay.value = true;
+}
+
+const save_Click = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate((valid, fields) => {
     if (valid) {
       ElMessage.success('添加成功');
-      dialogAddOrEditVisible.value = false;
+      editDialogDisplay.value = false;
     } else {
       window.console.log(fields);
     }
@@ -136,11 +128,11 @@ function onRemove() {
     <ElContainer style="height: 100%">
       <ElHeader style="line-height: 100px">
         <ElForm :inline="true" :model="queryData" class="demo-form-inline">
-          <ElFormItem label="菜单名/编号">
+          <ElFormItem label="角色名/编号">
             <ElInput
               v-model="queryData.NameOrCode"
               clearable
-              placeholder="请输入菜单名或编号"
+              placeholder="请输入角色名或编号"
               style="width: 200px"
             />
           </ElFormItem>
@@ -162,14 +154,11 @@ function onRemove() {
           <ElTable
             :border="true"
             :data="tableData"
-            :load="table_Parent_Row_Click"
-            :tree-props="{ hasChildren: 'HasChildren' }"
-            lazy
             row-key="Id"
             style="width: 100%"
           >
+            <ElTableColumn label="名称" prop="Name" />
             <ElTableColumn label="编码" prop="Code" />
-            <ElTableColumn label="模块/菜单" prop="Name" />
             <ElTableColumn label="创建时间" prop="CreateTime" />
             <ElTableColumn label="备注" prop="Remark" />
             <ElTableColumn fixed="right" label="操作" min-width="120">
@@ -178,7 +167,7 @@ function onRemove() {
                   size="small"
                   title="详情"
                   type="primary"
-                  @click="menuDetailDialog = true"
+                  @click="onViewDetail"
                 >
                   <LucidEye />
                 </ElButton>
@@ -231,8 +220,8 @@ function onRemove() {
     </ElContainer>
   </div>
 
-  <ElDialog v-model="dialogAddOrEditVisible" draggable overflow width="700">
-    <template #header>{{ dialogAddOrEdidTitle }}</template>
+  <ElDialog v-model="editDialogDisplay" draggable overflow width="700">
+    <template #header>{{ editDialogTitle }}</template>
     <ElDivider />
 
     <ElForm
@@ -251,51 +240,16 @@ function onRemove() {
         size="default"
       >
         <ElDescriptionsItem>
-          <template #label> <ElFormItem label="编号" prop="Code" /> </template>
+          <template #label>
+            <ElFormItem label="编码" prop="Code" />
+          </template>
           <ElInput v-model="ruleForm.Code" style="width: 100%" />
         </ElDescriptionsItem>
         <ElDescriptionsItem>
-          <template #label> <ElFormItem label="名称" prop="Name" /> </template>
+          <template #label>
+            <ElFormItem label="名称" prop="Name" />
+          </template>
           <ElInput v-model="ruleForm.Name" />
-        </ElDescriptionsItem>
-        <ElDescriptionsItem>
-          <template #label>
-            <ElFormItem label="路由名" prop="RoutName" />
-          </template>
-          <ElInput v-model="ruleForm.RoutName" />
-        </ElDescriptionsItem>
-        <ElDescriptionsItem>
-          <template #label>
-            <div class="cell-item">
-              <ElFormItem label="路由地址" prop="RoutPath" />
-            </div>
-          </template>
-          <ElInput v-model="ruleForm.RoutPath" />
-        </ElDescriptionsItem>
-        <ElDescriptionsItem>
-          <template #label>
-            <div class="cell-item">
-              <ElFormItem label="Icon" prop="Icon" />
-            </div>
-          </template>
-          <ElInput v-model="ruleForm.Icon" />
-        </ElDescriptionsItem>
-        <ElDescriptionsItem>
-          <template #label>
-            <ElFormItem label="父级菜单" prop="PId" />
-          </template>
-          <ElSelect v-model="ruleForm.PId" placeholder="请选择父级菜单">
-            <ElOption
-              label="根目录"
-              value="00000000-0000-0000-0000-000000000000"
-            />
-            <ElOption
-              v-for="item in parent"
-              :key="item.Id"
-              :label="`${item.Name}(${item.Code})`"
-              :value="item.Id"
-            />
-          </ElSelect>
         </ElDescriptionsItem>
         <ElDescriptionsItem>
           <template #label>
@@ -309,12 +263,14 @@ function onRemove() {
     </ElForm>
     <ElDivider />
     <template #footer>
-      <ElButton @click="dialogAddOrEditVisible = false"> 取消 </ElButton>
-      <ElButton type="primary" @click="SaveMenu(ruleFormRef)"> 保存 </ElButton>
+      <ElButton @click="editDialogDisplay = false"> 取消 </ElButton>
+      <ElButton type="primary" @click="save_Click(ruleFormRef)">
+        保存
+      </ElButton>
     </template>
   </ElDialog>
 
-  <ElDialog v-model="menuDetailDialog" draggable overflow width="700">
+  <ElDialog v-model="detailDialogDisplay" draggable overflow width="700">
     <template #header>详情</template>
     <ElDivider />
 
@@ -359,7 +315,7 @@ function onRemove() {
     </ElDescriptions>
     <ElDivider />
     <template #footer>
-      <ElButton @click="menuDetailDialog = false"> 关闭 </ElButton>
+      <ElButton @click="detailDialogDisplay = false"> 关闭 </ElButton>
     </template>
   </ElDialog>
 </template>
