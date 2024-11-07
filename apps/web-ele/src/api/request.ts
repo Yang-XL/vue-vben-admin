@@ -30,16 +30,7 @@ function createRequestClient(baseURL: string) {
           };
         },
         unAuthorizedHandler: async () => {
-          const accessStore = useAccessStore();
-          const authStore = useAuthStore();
-          accessStore.setAccessToken(null);
-
-          if (preferences.app.loginExpiredMode === 'modal') {
-            accessStore.setLoginExpired(true);
-          } else {
-            // 退出登录
-            await authStore.logout();
-          }
+          await unAuthorized();
         },
       };
     },
@@ -52,16 +43,35 @@ function createRequestClient(baseURL: string) {
       };
     },
   });
-  client.addResponseInterceptor<HttpResponse>((response) => {
+  client.addResponseInterceptor<HttpResponse>(async (response) => {
     const { data: responseData, status } = response;
 
     const { code, data, message: msg } = responseData;
-    if (status >= 200 && status < 400 && code === 0) {
+    if (status >= 200 && status < 400 && code === 0 && data.state) {
       return data;
+    }
+    if (data.msg !== '') {
+      throw new Error(data.msg);
+    }
+    if (data.code === '401') {
+      await unAuthorized();
     }
     throw new Error(`Error ${status}: ${msg}`);
   });
   return client;
+}
+
+async function unAuthorized() {
+  const accessStore = useAccessStore();
+  const authStore = useAuthStore();
+  accessStore.setAccessToken(null);
+
+  if (preferences.app.loginExpiredMode === 'modal') {
+    accessStore.setLoginExpired(true);
+  } else {
+    // 退出登录
+    await authStore.logout();
+  }
 }
 
 export const requestClient = createRequestClient(apiURL);
