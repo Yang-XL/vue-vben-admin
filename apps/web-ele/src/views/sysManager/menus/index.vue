@@ -3,6 +3,8 @@
 
 import type { FormInstance, FormRules } from 'element-plus';
 
+import type { PageResponse } from '#/types/PageRecord';
+
 import { onMounted, reactive, ref } from 'vue';
 
 import {
@@ -16,6 +18,7 @@ import {
 import {
   ElButton,
   ElCard,
+  ElCol,
   ElContainer,
   ElDescriptions,
   ElDescriptionsItem,
@@ -26,12 +29,15 @@ import {
   ElFormItem,
   ElHeader,
   ElInput,
+  ElInputNumber,
   ElMain,
   ElMessage,
   ElOption,
   ElPagination,
   ElPopconfirm,
+  ElRow,
   ElSelect,
+  ElSwitch,
   ElTable,
   ElTableColumn,
   ElTag,
@@ -43,7 +49,6 @@ import {
   type SysMenu,
   sysMenuRules,
   useDefaultPage,
-  useDefaultSysMenu,
 } from '#/types';
 
 // #endregion
@@ -62,30 +67,47 @@ const onQueryMenu = () => {
 // #region 表格区域
 
 const tableData = reactive<SysMenu[]>([]);
-const parent = reactive<SysMenu[]>([]);
+const page = reactive<PageInfo>(useDefaultPage());
+const menuInfoDetail: SysMenu = {
+  component: '',
+  id: '',
+  KeepAlive: false,
+  Link: false,
+  Name: '',
+  OrderIndex: 0,
+  parentId: '',
+  Path: '',
+  Remark: '',
+  Title: '',
+};
+
+const ruleForm = reactive<SysMenu>(menuInfoDetail);
+
 onMounted(() => {
-  getParentPageList().then((p: SysMenu[]) => {
-    Object.assign(tableData, p);
-    Object.assign(parent, p);
-  });
+  LoadData();
 });
 
 function LoadData() {
-  getParentPageList().then((p: SysMenu[]) => {
-    Object.assign(tableData, p);
-  });
+  getParentPageList(page.currentPage, page.PageSize, queryData.NameOrCode).then(
+    (p: PageResponse<SysMenu>) => {
+      Object.assign(tableData, p.record);
+      page.total = p.total;
+      page.currentPage = p.currentPage;
+    },
+  );
 }
 const table_Parent_Row_Click = (
   row: SysMenu,
   _treeNode: unknown,
   resolve: (date: SysMenu[]) => void,
-) => getChildPageList(row.Id).then((c: SysMenu[]) => resolve(c));
+) =>
+  getChildPageList(row.id).then((c: PageResponse<SysMenu>) =>
+    resolve(c.record),
+  );
 
 // #endregion
 
 // #region 分页区域
-
-const page = reactive<PageInfo>(useDefaultPage());
 
 const handleSizeChange = (val: number) => {
   window.console.log(`${val} items per page`);
@@ -98,8 +120,6 @@ const handleCurrentChange = (val: number) => {
 // #region 弹窗区域
 const menuDetailDialog = ref(false);
 const dialogAddOrEditVisible = ref(false);
-
-const ruleForm = reactive<SysMenu>(useDefaultSysMenu());
 
 const dialogAddOrEdidTitle = ref('添加');
 const ruleFormRef = ref<FormInstance>();
@@ -163,15 +183,24 @@ function onRemove() {
             :border="true"
             :data="tableData"
             :load="table_Parent_Row_Click"
-            :tree-props="{ hasChildren: 'HasChildren' }"
+            :tree-props="{ hasChildren: 'hasChildren' }"
             lazy
-            row-key="Id"
+            row-key="id"
             style="width: 100%"
           >
-            <ElTableColumn label="编码" prop="Code" />
-            <ElTableColumn label="模块/菜单" prop="Name" />
-            <ElTableColumn label="创建时间" prop="CreateTime" />
-            <ElTableColumn label="备注" prop="Remark" />
+            <ElTableColumn label="模块/菜单" prop="title" />
+            <ElTableColumn label="备注" prop="remark" />
+            <ElTableColumn label="页面缓存" prop="keepalive">
+              <template #default="scope">
+                <ElTag
+                  :type="scope.row.keepalive ? 'warning' : 'success'"
+                  disable-transitions
+                >
+                  {{ scope.row.keepalive ? '已开启' : '已关闭' }}
+                </ElTag>
+              </template>
+            </ElTableColumn>
+            <ElTableColumn label="component" prop="component" />
             <ElTableColumn fixed="right" label="操作" min-width="120">
               <template #default>
                 <ElButton
@@ -216,13 +245,13 @@ function onRemove() {
       <ElDivider />
       <ElFooter style="line-height: 80px">
         <ElPagination
+          v-model:current-page="page.currentPage"
+          v-model:page.size="page.Size"
           :background="page.Background"
-          :current-page="page.CurrentPage"
           :default-page-size="page.PageSize"
           :disabled="page.Disabled"
-          :page-sizes="page.Size"
           :size="page.SizeStype"
-          :total="400"
+          :total="page.total"
           layout="total, sizes, prev, pager, next, jumper"
           @current-change="handleCurrentChange"
           @size-change="handleSizeChange"
@@ -234,7 +263,6 @@ function onRemove() {
   <ElDialog v-model="dialogAddOrEditVisible" draggable overflow width="700">
     <template #header>{{ dialogAddOrEdidTitle }}</template>
     <ElDivider />
-
     <ElForm
       ref="ruleFormRef"
       :inline-message="true"
@@ -244,68 +272,68 @@ function onRemove() {
       label-width="auto"
       status-icon
     >
-      <ElDescriptions
-        :border="true"
-        :column="2"
-        class="margin-top"
-        size="default"
-      >
-        <ElDescriptionsItem>
-          <template #label> <ElFormItem label="编号" prop="Code" /> </template>
-          <ElInput v-model="ruleForm.Code" style="width: 100%" />
-        </ElDescriptionsItem>
-        <ElDescriptionsItem>
-          <template #label> <ElFormItem label="名称" prop="Name" /> </template>
-          <ElInput v-model="ruleForm.Name" />
-        </ElDescriptionsItem>
-        <ElDescriptionsItem>
-          <template #label>
-            <ElFormItem label="路由名" prop="RoutName" />
-          </template>
-          <ElInput v-model="ruleForm.RoutName" />
-        </ElDescriptionsItem>
-        <ElDescriptionsItem>
-          <template #label>
-            <div class="cell-item">
-              <ElFormItem label="路由地址" prop="RoutPath" />
-            </div>
-          </template>
-          <ElInput v-model="ruleForm.RoutPath" />
-        </ElDescriptionsItem>
-        <ElDescriptionsItem>
-          <template #label>
-            <div class="cell-item">
-              <ElFormItem label="Icon" prop="Icon" />
-            </div>
-          </template>
-          <ElInput v-model="ruleForm.Icon" />
-        </ElDescriptionsItem>
-        <ElDescriptionsItem>
-          <template #label>
-            <ElFormItem label="父级菜单" prop="PId" />
-          </template>
-          <ElSelect v-model="ruleForm.PId" placeholder="请选择父级菜单">
-            <ElOption
-              label="根目录"
-              value="00000000-0000-0000-0000-000000000000"
-            />
-            <ElOption
-              v-for="item in parent"
-              :key="item.Id"
-              :label="`${item.Name}(${item.Code})`"
-              :value="item.Id"
-            />
-          </ElSelect>
-        </ElDescriptionsItem>
-        <ElDescriptionsItem>
-          <template #label>
-            <div class="cell-item">
-              <ElFormItem label="备注" prop="Remark" />
-            </div>
-          </template>
-          <ElInput v-model="ruleForm.Remark" type="textarea" />
-        </ElDescriptionsItem>
-      </ElDescriptions>
+      <ElRow>
+        <ElCol :span="12">
+          <ElFormItem label="父级菜单" prop="ParentId">
+            <ElSelect v-model="ruleForm.parentId" placeholder="请选择父级菜单">
+              <ElOption
+                label="根目录"
+                value="00000000-0000-0000-0000-000000000000"
+              />
+            </ElSelect>
+          </ElFormItem>
+        </ElCol>
+        <ElCol :span="12">
+          <ElFormItem label="RoutName">
+            <ElInput v-model="ruleForm.name" />
+          </ElFormItem>
+        </ElCol>
+        <ElCol :span="12">
+          <ElFormItem label="RoutPath">
+            <ElInput v-model="ruleForm.path" />
+          </ElFormItem>
+        </ElCol>
+        <ElCol :span="12">
+          <ElFormItem label="Component">
+            <ElInput v-model="ruleForm.component" />
+          </ElFormItem>
+        </ElCol>
+      </ElRow>
+      <ElRow>
+        <ElCol :span="12">
+          <ElFormItem label="图标">
+            <ElInput v-model="ruleForm.icon" />
+          </ElFormItem>
+        </ElCol>
+
+        <ElCol :span="12">
+          <ElFormItem label="排序">
+            <ElInputNumber v-model="ruleForm.orderIndex" :max="1000" :min="1" />
+          </ElFormItem>
+        </ElCol>
+        <ElCol :span="12">
+          <ElFormItem label="前端缓存">
+            <ElSwitch v-model="ruleForm.keepAlive" />
+          </ElFormItem>
+        </ElCol>
+        <ElCol :span="12">
+          <ElFormItem label="右侧固定">
+            <ElSwitch v-model="ruleForm.affixTab" />
+          </ElFormItem>
+        </ElCol>
+        <ElCol>
+          <ElFormItem label="外部链接地址">
+            <ElInput v-model="ruleForm.link" />
+          </ElFormItem>
+        </ElCol>
+      </ElRow>
+      <ElRow>
+        <ElCol>
+          <ElFormItem label="备注">
+            <ElInput v-model="ruleForm.remark" type="textarea" />
+          </ElFormItem>
+        </ElCol>
+      </ElRow>
     </ElForm>
     <ElDivider />
     <template #footer>
@@ -366,9 +394,5 @@ function onRemove() {
 <style scoped>
 .el-container {
   min-height: 86vh;
-}
-
-.el-form-item {
-  margin-bottom: 0;
 }
 </style>

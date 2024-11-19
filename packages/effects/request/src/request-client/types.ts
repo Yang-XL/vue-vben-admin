@@ -47,12 +47,28 @@ interface HttpResponse<T = any> {
    * 0 表示成功 其他表示失败
    * 0 means success, others means fail
    */
-  code: number;
+  code: string;
   data: T;
-  message: string;
+  msg: string;
+  state: boolean;
+}
+
+interface HttpPageResponse<T = any> {
+  /**
+   * 0 表示成功 其他表示失败
+   * 0 means success, others means fail
+   */
+  code: string;
+  data: T;
+  msg: string;
+  state: boolean;
+  PageSize: number;
+  Total: number;
+  TotalPage: number;
 }
 
 export type {
+  HttpPageResponse,
   HttpResponse,
   MakeAuthorizationFn,
   MakeErrorMessageFn,

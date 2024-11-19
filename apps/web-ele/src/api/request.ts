@@ -1,7 +1,7 @@
 /**
  * 该文件可自行根据业务逻辑进行调整
  */
-import type { HttpResponse } from '@vben/request';
+import type { HttpPageResponse, HttpResponse } from '@vben/request';
 
 import { useAppConfig } from '@vben/hooks';
 import { preferences } from '@vben/preferences';
@@ -11,6 +11,8 @@ import { useAccessStore } from '@vben/stores';
 import { ElMessage } from 'element-plus';
 
 import { useAuthStore } from '#/store';
+
+export * from './baseType';
 
 const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
@@ -43,19 +45,46 @@ function createRequestClient(baseURL: string) {
       };
     },
   });
-  client.addResponseInterceptor<HttpResponse>(async (response) => {
+
+  return client;
+}
+
+function userPageResponse(client: RequestClient) {
+  client.addResponseInterceptor<HttpPageResponse>(async (response) => {
     const { data: responseData, status } = response;
 
-    const { code, data, message: msg } = responseData;
-    if (status >= 200 && status < 400 && code === 0 && data.state) {
+    const { code, data, msg, state } = responseData;
+
+    if (status >= 200 && status < 400 && code.toString() === '200' && state) {
       return data;
+    }
+    if (code.toString() === '401') {
+      await unAuthorized();
     }
     if (data.msg !== '') {
       throw new Error(data.msg);
     }
-    if (data.code === '401') {
+    throw new Error(`Error ${status}: ${msg}`);
+  });
+  return client;
+}
+
+function userResponse(client: RequestClient) {
+  client.addResponseInterceptor<HttpResponse>(async (response) => {
+    const { data: responseData, status } = response;
+
+    const { code, data, msg, state } = responseData;
+
+    if (status >= 200 && status < 400 && code.toString() === '200' && state) {
+      return data;
+    }
+    if (code.toString() === '401') {
       await unAuthorized();
     }
+    if (data.msg !== '') {
+      throw new Error(data.msg);
+    }
+
     throw new Error(`Error ${status}: ${msg}`);
   });
   return client;
@@ -74,4 +103,5 @@ async function unAuthorized() {
   }
 }
 
-export const requestClient = createRequestClient(apiURL);
+export const requestClient = userResponse(createRequestClient(apiURL));
+export const requestPageClient = userPageResponse(createRequestClient(apiURL));

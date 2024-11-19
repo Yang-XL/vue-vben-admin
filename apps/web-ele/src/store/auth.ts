@@ -10,7 +10,7 @@ import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 import { ElNotification } from 'element-plus';
 import { defineStore } from 'pinia';
 
-import { getAccessCodesApi, getUserInfoApi, loginApi } from '#/api';
+import { getUserInfoApi, loginApi } from '#/api';
 import { $t } from '#/locales';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -30,10 +30,11 @@ export const useAuthStore = defineStore('auth', () => {
     onSuccess?: () => Promise<void> | void,
   ) {
     // 异步处理用户登录操作并获取 accessToken
-    let userInfo: null | UserInfo = null;
+
     try {
       loginLoading.value = true;
-      const { accessToken, refreshToken } = await loginApi(params);
+      const rep = await loginApi(params);
+      const { accessToken, refreshToken } = rep;
 
       // 如果成功获取到 accessToken
       if (accessToken) {
@@ -42,27 +43,22 @@ export const useAuthStore = defineStore('auth', () => {
         accessStore.setRefreshToken(refreshToken);
 
         // 获取用户信息并存储到 accessStore 中
-        const [fetchUserInfoResult, accessCodes] = await Promise.all([
-          fetchUserInfo(),
-          getAccessCodesApi(),
-        ]);
+        // const [accessCodes] = await Promise.all([getAccessCodesApi()]);
 
-        userInfo = fetchUserInfoResult;
-
-        userStore.setUserInfo(userInfo);
-        accessStore.setAccessCodes(accessCodes);
+        userStore.setUserRoles(rep.RolesCode);
+        // accessStore.setAccessCodes(accessCodes);
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
         } else {
           onSuccess
             ? await onSuccess?.()
-            : await router.push(userInfo.homePath || DEFAULT_HOME_PATH);
+            : await router.push(rep?.homePage || DEFAULT_HOME_PATH);
         }
 
-        if (userInfo?.realName) {
+        if (rep?.realName) {
           ElNotification({
-            message: `${$t('authentication.loginSuccessDesc')}:${userInfo?.realName}`,
+            message: `${$t('authentication.loginSuccessDesc')}:${rep?.realName}`,
             title: $t('authentication.loginSuccess'),
             type: 'success',
           });
@@ -72,9 +68,9 @@ export const useAuthStore = defineStore('auth', () => {
       loginLoading.value = false;
     }
 
-    return {
-      userInfo,
-    };
+    // return {
+    //   userInfo,
+    // };
   }
 
   async function logout() {

@@ -15,6 +15,8 @@ export namespace AuthApi {
     refreshToken: string;
     userId: string;
     username: string;
+    homePage: string;
+    RolesCode: string[];
   }
 }
 
@@ -22,7 +24,10 @@ export namespace AuthApi {
  * 登录
  */
 export async function loginApi(data: AuthApi.LoginParams) {
-  return requestClient.post<AuthApi.LoginResult>('/auth/login', data);
+  return requestClient.post<AuthApi.LoginResult>(
+    '/user-service/User/Login',
+    data,
+  );
 }
 
 /**

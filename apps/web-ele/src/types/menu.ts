@@ -1,46 +1,30 @@
-import type { RouteMeta as IRouteMeta } from '@vben-core/typings';
 import type { FormRules } from 'element-plus';
 
 interface SysMenu {
-  Id: string;
-  Name: string;
-  Code: string;
-  OrderIndex: number;
-  CreateTime: string;
-  Remark: string;
-  PId: string;
-  RoutName?: string;
-  Path?: string;
-  redirect?: '';
-  Icon?: string;
-  HasChildren: boolean;
-  children?: SysMenu[];
-  meta?: IRouteMeta;
-}
-
-function useDefaultSysMenu(): SysMenu {
-  return {
-    Code: '',
-    CreateTime: '',
-    HasChildren: false,
-    Id: '',
-    Name: '',
-    OrderIndex: 0,
-    PId: '',
-    Remark: '',
-  };
+  id: string;
+  name: string;
+  title: string;
+  orderIndex: number;
+  remark: string;
+  parentId: string;
+  path: string;
+  component: string;
+  icon?: string;
+  keepAlive: boolean;
+  link: string;
+  affixTab: boolean;
 }
 
 const sysMenuRules: FormRules<SysMenu> = {
-  Code: [
+  component: [
     {
-      message: '请输入模块编号',
+      message: '请输入vue路径地址',
       required: true,
       trigger: 'change',
       type: 'string',
     },
   ],
-  Name: [
+  name: [
     {
       message: '请输入模块名',
       required: true,
@@ -48,7 +32,7 @@ const sysMenuRules: FormRules<SysMenu> = {
       type: 'string',
     },
   ],
-  OrderIndex: [
+  orderIndex: [
     {
       message: '请输入序号',
       required: true,
@@ -56,7 +40,7 @@ const sysMenuRules: FormRules<SysMenu> = {
       type: 'number',
     },
   ],
-  PId: [
+  parentId: [
     {
       message: '请选择父级模块',
       required: true,
@@ -64,7 +48,7 @@ const sysMenuRules: FormRules<SysMenu> = {
       type: 'string',
     },
   ],
-  Remark: [
+  remark: [
     {
       message: '请输入备注',
       required: true,
@@ -73,4 +57,4 @@ const sysMenuRules: FormRules<SysMenu> = {
     },
   ],
 };
-export { type SysMenu, sysMenuRules, useDefaultSysMenu };
+export { type SysMenu, sysMenuRules };
